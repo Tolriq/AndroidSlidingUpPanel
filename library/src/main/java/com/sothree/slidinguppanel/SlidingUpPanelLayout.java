@@ -9,10 +9,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.app.BundleCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -26,8 +24,8 @@ import android.view.animation.Interpolator;
 
 import com.sothree.slidinguppanel.library.R;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings({"JavaDoc", "unused"})
 public class SlidingUpPanelLayout extends ViewGroup {
@@ -216,7 +214,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
     private float mInitialMotionY;
     private boolean mIsScrollableViewHandlingTouch = false;
 
-    private List<PanelSlideListener> mPanelSlideListeners = new ArrayList<>();
+    private List<PanelSlideListener> mPanelSlideListeners = new CopyOnWriteArrayList<>();
     private View.OnClickListener mFadeOnClickListener;
 
     private final ViewDragHelper mDragHelper;
@@ -1305,7 +1303,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        if(state instanceof Bundle) {
+        if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
             mSlideState = (PanelState) bundle.getSerializable(SLIDING_STATE);
             mSlideState = mSlideState == null ? DEFAULT_SLIDE_STATE : mSlideState;
