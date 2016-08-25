@@ -8,9 +8,11 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.app.BundleCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -75,6 +77,10 @@ public class SlidingUpPanelLayout extends ViewGroup {
     private static final int[] DEFAULT_ATTRS = new int[]{
             android.R.attr.gravity
     };
+    /**
+     * Tag for the sliding state stored inside the bundle
+     */
+    public static final String SLIDING_STATE = "sliding_state";
 
     /**
      * Minimum velocity that will be detected as a fling
@@ -1291,22 +1297,21 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
     @Override
     public Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-
-        SavedState ss = new SavedState(superState);
-        if (mSlideState != PanelState.DRAGGING) {
-            ss.mSlideState = mSlideState;
-        } else {
-            ss.mSlideState = mLastNotDraggingSlideState;
-        }
-        return ss;
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("superState", super.onSaveInstanceState());
+        bundle.putSerializable(SLIDING_STATE, mSlideState != PanelState.DRAGGING ? mSlideState : mLastNotDraggingSlideState);
+        return bundle;
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        super.onRestoreInstanceState(ss.getSuperState());
-        mSlideState = ss.mSlideState != null ? ss.mSlideState : DEFAULT_SLIDE_STATE;
+        if(state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            mSlideState = (PanelState) bundle.getSerializable(SLIDING_STATE);
+            mSlideState = mSlideState == null ? DEFAULT_SLIDE_STATE : mSlideState;
+            state = bundle.getParcelable("superState");
+        }
+        super.onRestoreInstanceState(state);
     }
 
     private class DragHelperCallback extends ViewDragHelper.Callback {
@@ -1443,43 +1448,5 @@ public class SlidingUpPanelLayout extends ViewGroup {
                 ta.recycle();
             }
         }
-    }
-
-    static class SavedState extends BaseSavedState {
-        PanelState mSlideState;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        private SavedState(Parcel in) {
-            super(in);
-            String panelStateString = in.readString();
-            try {
-                mSlideState = panelStateString != null ? Enum.valueOf(PanelState.class, panelStateString)
-                        : PanelState.COLLAPSED;
-            } catch (IllegalArgumentException e) {
-                mSlideState = PanelState.COLLAPSED;
-            }
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeString(mSlideState == null ? null : mSlideState.toString());
-        }
-
-        public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
-
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
     }
 }
