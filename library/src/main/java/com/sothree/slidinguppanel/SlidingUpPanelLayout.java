@@ -1228,7 +1228,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
         super.draw(c);
 
         // draw the shadow
-        if (mShadowDrawable != null && mSlideableView != null) {
+        if (mShadowDrawable != null && mSlideableView != null && mSlideState != PanelState.HIDDEN) {
             final int right = mSlideableView.getRight();
             final int top;
             final int bottom;
