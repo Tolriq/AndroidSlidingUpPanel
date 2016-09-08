@@ -219,6 +219,8 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
     private final ViewDragHelper mDragHelper;
 
+    private boolean mDisableDragViewClick = false;
+
     /**
      * Stores whether or not the pane was expanded the last time it was slideable.
      * If expand/collapse operations are invoked this state is modified. Used by
@@ -445,6 +447,37 @@ public class SlidingUpPanelLayout extends ViewGroup {
         }
     }
 
+    public void disableDragViewClick() {
+        mDisableDragViewClick = true;
+        if (mDragView != null) {
+            mDragView.setOnClickListener(null);
+        }
+    }
+
+    public void enableDragViewClick() {
+        mDisableDragViewClick = false;
+        if (mDragView != null) {
+            mDragView.setClickable(true);
+            mDragView.setFocusable(false);
+            mDragView.setFocusableInTouchMode(false);
+            mDragView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!isEnabled() || !isTouchEnabled()) return;
+                    if (mSlideState != PanelState.EXPANDED && mSlideState != PanelState.ANCHORED) {
+                        if (mAnchorPoint < 1.0f) {
+                            setPanelState(PanelState.ANCHORED);
+                        } else {
+                            setPanelState(PanelState.EXPANDED);
+                        }
+                    } else {
+                        setPanelState(PanelState.COLLAPSED);
+                    }
+                }
+            });
+        }
+    }
+
     /**
      * @return The current collapsed panel height
      */
@@ -528,25 +561,8 @@ public class SlidingUpPanelLayout extends ViewGroup {
             mDragView.setOnClickListener(null);
         }
         mDragView = dragView;
-        if (mDragView != null) {
-            mDragView.setClickable(true);
-            mDragView.setFocusable(false);
-            mDragView.setFocusableInTouchMode(false);
-            mDragView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!isEnabled() || !isTouchEnabled()) return;
-                    if (mSlideState != PanelState.EXPANDED && mSlideState != PanelState.ANCHORED) {
-                        if (mAnchorPoint < 1.0f) {
-                            setPanelState(PanelState.ANCHORED);
-                        } else {
-                            setPanelState(PanelState.EXPANDED);
-                        }
-                    } else {
-                        setPanelState(PanelState.COLLAPSED);
-                    }
-                }
-            });
+        if (mDragView != null && !mDisableDragViewClick) {
+            enableDragViewClick();
         }
     }
 
