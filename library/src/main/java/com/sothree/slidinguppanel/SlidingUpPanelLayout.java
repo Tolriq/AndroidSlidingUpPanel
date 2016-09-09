@@ -1124,6 +1124,15 @@ public class SlidingUpPanelLayout extends ViewGroup {
         }
     }
 
+    public void setForcedPanelState(PanelState state) {
+        if (mSlideState == PanelState.DRAGGING) {
+            if (mDragHelper != null) {
+                mDragHelper.abort();
+            }
+        }
+        setPanelState(state);
+    }
+
     private void setPanelStateInternal(PanelState state) {
         if (mSlideState == state) return;
         PanelState oldState = mSlideState;
