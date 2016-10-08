@@ -24,8 +24,8 @@ import android.view.animation.Interpolator;
 
 import com.sothree.slidinguppanel.library.R;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings({"JavaDoc", "unused"})
 public class SlidingUpPanelLayout extends ViewGroup {
@@ -214,7 +214,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
     private float mInitialMotionY;
     private boolean mIsScrollableViewHandlingTouch = false;
 
-    private List<PanelSlideListener> mPanelSlideListeners = new CopyOnWriteArrayList<>();
+    private final List<PanelSlideListener> mPanelSlideListeners = new ArrayList<>();
     private View.OnClickListener mFadeOnClickListener;
 
     private final ViewDragHelper mDragHelper;
@@ -528,7 +528,9 @@ public class SlidingUpPanelLayout extends ViewGroup {
      * @param listener
      */
     public void addPanelSlideListener(PanelSlideListener listener) {
-        mPanelSlideListeners.add(listener);
+        synchronized (mPanelSlideListeners) {
+            mPanelSlideListeners.add(listener);
+        }
     }
 
     /**
@@ -537,7 +539,9 @@ public class SlidingUpPanelLayout extends ViewGroup {
      * @param listener
      */
     public void removePanelSlideListener(PanelSlideListener listener) {
-        mPanelSlideListeners.remove(listener);
+        synchronized (mPanelSlideListeners) {
+            mPanelSlideListeners.remove(listener);
+        }
     }
 
     /**
@@ -651,14 +655,18 @@ public class SlidingUpPanelLayout extends ViewGroup {
     }
 
     void dispatchOnPanelSlide(View panel) {
-        for (PanelSlideListener l : mPanelSlideListeners) {
-            l.onPanelSlide(panel, mSlideOffset);
+        synchronized (mPanelSlideListeners) {
+            for (PanelSlideListener l : mPanelSlideListeners) {
+                l.onPanelSlide(panel, mSlideOffset);
+            }
         }
     }
 
     void dispatchOnPanelStateChanged(View panel, PanelState previousState, PanelState newState) {
-        for (PanelSlideListener l : mPanelSlideListeners) {
-            l.onPanelStateChanged(panel, previousState, newState);
+        synchronized (mPanelSlideListeners) {
+            for (PanelSlideListener l : mPanelSlideListeners) {
+                l.onPanelStateChanged(panel, previousState, newState);
+            }
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
     }
@@ -731,9 +739,9 @@ public class SlidingUpPanelLayout extends ViewGroup {
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (widthMode != MeasureSpec.EXACTLY) {
+        if (widthMode != MeasureSpec.EXACTLY && widthMode != MeasureSpec.AT_MOST) {
             throw new IllegalStateException("Width must have an exact value or MATCH_PARENT");
-        } else if (heightMode != MeasureSpec.EXACTLY) {
+        } else if (heightMode != MeasureSpec.EXACTLY && heightMode != MeasureSpec.AT_MOST) {
             throw new IllegalStateException("Height must have an exact value or MATCH_PARENT");
         }
 
@@ -1152,7 +1160,9 @@ public class SlidingUpPanelLayout extends ViewGroup {
     }
 
     private void onPanelDragged(int newTop) {
-        mLastNotDraggingSlideState = mSlideState;
+        if (mSlideState != PanelState.DRAGGING) {
+            mLastNotDraggingSlideState = mSlideState;
+        }
         setPanelStateInternal(PanelState.DRAGGING);
         // Recompute the slide offset based on the new top position
         mSlideOffset = computeSlideOffset(newTop);
