@@ -177,6 +177,8 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
     private PanelState mSlideState = DEFAULT_SLIDE_STATE;
 
+    private PanelState mTargetSlideState = DEFAULT_SLIDE_STATE;
+
     /**
      * If the current slide state is DRAGGING, this will store the last non dragging state
      */
@@ -1110,6 +1112,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
         if (mFirstLayout) {
             setPanelStateInternal(state);
         } else {
+            mTargetSlideState = state;
             if (mSlideState == PanelState.HIDDEN) {
                 mSlideableView.setVisibility(View.VISIBLE);
                 requestLayout();
@@ -1141,8 +1144,15 @@ public class SlidingUpPanelLayout extends ViewGroup {
         setPanelState(state);
     }
 
+    public PanelState getTargetSlideState() {
+        return mTargetSlideState;
+    }
+
     private void setPanelStateInternal(PanelState state) {
         if (mSlideState == state) return;
+        if (state != PanelState.DRAGGING) {
+            mTargetSlideState = state;
+        }
         PanelState oldState = mSlideState;
         mSlideState = state;
         dispatchOnPanelStateChanged(this, oldState, state);
