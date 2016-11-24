@@ -1101,12 +1101,16 @@ public class SlidingUpPanelLayout extends ViewGroup {
      * @param state - new panel state
      */
     public void setPanelState(PanelState state) {
+        setPanelState(state, false);
+    }
+
+    public void setPanelState(PanelState state, boolean force) {
         if (state == null || state == PanelState.DRAGGING) {
             throw new IllegalArgumentException("Panel state cannot be null or DRAGGING.");
         }
         if (!isEnabled()
                 || (!mFirstLayout && mSlideableView == null)
-                || state == mSlideState
+                || (state == mSlideState && !force)
                 || mSlideState == PanelState.DRAGGING) return;
 
         if (mFirstLayout) {
@@ -1136,12 +1140,10 @@ public class SlidingUpPanelLayout extends ViewGroup {
     }
 
     public void setForcedPanelState(PanelState state) {
-        if (mSlideState == PanelState.DRAGGING) {
-            if (mDragHelper != null) {
-                mDragHelper.abort();
-            }
+        if (mDragHelper != null) {
+            mDragHelper.abort();
         }
-        setPanelState(state);
+        setPanelState(state, true);
     }
 
     public PanelState getTargetSlideState() {
