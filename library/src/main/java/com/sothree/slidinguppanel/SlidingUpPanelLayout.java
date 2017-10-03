@@ -24,8 +24,8 @@ import android.view.animation.Interpolator;
 
 import com.sothree.slidinguppanel.library.R;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings({"JavaDoc", "unused"})
 public class SlidingUpPanelLayout extends ViewGroup {
@@ -216,7 +216,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
     private float mInitialMotionY;
     private boolean mIsScrollableViewHandlingTouch = false;
 
-    private final List<PanelSlideListener> mPanelSlideListeners = new ArrayList<>();
+    private final List<PanelSlideListener> mPanelSlideListeners = new CopyOnWriteArrayList<>();
     private View.OnClickListener mFadeOnClickListener;
 
     private final ViewDragHelper mDragHelper;
@@ -530,9 +530,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
      * @param listener
      */
     public void addPanelSlideListener(PanelSlideListener listener) {
-        synchronized (mPanelSlideListeners) {
-            mPanelSlideListeners.add(listener);
-        }
+        mPanelSlideListeners.add(listener);
     }
 
     /**
@@ -541,9 +539,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
      * @param listener
      */
     public void removePanelSlideListener(PanelSlideListener listener) {
-        synchronized (mPanelSlideListeners) {
-            mPanelSlideListeners.remove(listener);
-        }
+        mPanelSlideListeners.remove(listener);
     }
 
     /**
@@ -802,6 +798,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
             int childHeightSpec;
             if (lp.height == LayoutParams.WRAP_CONTENT) {
+                //noinspection Range
                 childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
             } else {
                 // Modify the height based on the weight.
@@ -810,6 +807,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
                 } else if (lp.height != LayoutParams.MATCH_PARENT) {
                     height = lp.height;
                 }
+                //noinspection Range
                 childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
             }
 
@@ -1370,7 +1368,6 @@ public class SlidingUpPanelLayout extends ViewGroup {
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
             return !mIsUnableToDrag && child == mSlideableView;
-
         }
 
         @Override
