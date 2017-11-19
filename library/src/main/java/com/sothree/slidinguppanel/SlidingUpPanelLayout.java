@@ -971,7 +971,11 @@ public class SlidingUpPanelLayout extends ViewGroup {
 
         if (!isEnabled() || !isTouchEnabled() || (mIsUnableToDrag && action != MotionEvent.ACTION_DOWN)) {
             mDragHelper.cancel();
-            return super.dispatchTouchEvent(ev);
+            try {
+                return super.dispatchTouchEvent(ev);
+            } catch (Exception ignore) {
+                return true;
+            }
         }
 
         final float y = ev.getY();
