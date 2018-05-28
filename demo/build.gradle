@@ -1,24 +1,29 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 27
-  buildToolsVersion "27.0.3"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
 
-  lintOptions {
-    abortOnError false
-  }
+    lintOptions {
+        abortOnError false
+    }
 
-  defaultConfig {
-    applicationId "com.sothree.slidinguppanel.demo"
-    minSdkVersion 14
-    targetSdkVersion 27
-    versionCode 15
-    versionName "3.3.0"
-  }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    defaultConfig {
+        applicationId "com.sothree.slidinguppanel.demo"
+        minSdkVersion 16
+        targetSdkVersion 27
+        versionCode 15
+        versionName "3.3.0"
+    }
 }
 
 dependencies {
-  implementation 'com.android.support:support-v4:27.1.1'
-  implementation 'com.android.support:appcompat-v7:27.1.1'
-  implementation project(':library')
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation project(':library')
 }
